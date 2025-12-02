@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Румпель: Панель Судьи</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="setup-screen" class="screen active">
+        <div class="glass-card setup-card">
+            <div class="logo-area">
+                <i class="fa-solid fa-chess-rook"></i>
+                <h1>Румпель</h1>
+                <p>Панель управления игрой</p>
+            </div>
+            
+            <div class="input-group">
+                <label>Количество игроков</label>
+                <div class="number-control">
+                    <button id="btn-dec-players"><i class="fa-solid fa-minus"></i></button>
+                    <input type="number" id="player-count" value="4" min="2" max="12" readonly>
+                    <button id="btn-inc-players"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+            <button id="btn-start" class="btn btn-primary btn-lg">
+                Начать игру <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <header class="dashboard-header">
+            <div class="stat-badge">
+                <span class="label">Раунд</span>
+                <span class="value" id="round-display">1<span class="total">/10</span></span>
+            </div>
+
+            <div class="actions-bar">
+                <button class="btn btn-icon btn-action" id="btn-roll-action">
+                    <i class="fa-solid fa-dice"></i> Действие
+                </button>
+                <div id="dice-res-action" class="dice-result">...</div>
+                
+                <div class="divider"></div>
+
+                <button class="btn btn-icon btn-sphere" id="btn-roll-sphere">
+                    <i class="fa-solid fa-cubes-stacked"></i> Сфера
+                </button>
+                <div id="dice-res-sphere" class="dice-result">...</div>
+            </div>
+
+            <div class="control-bar">
+                <button id="btn-crisis" class="btn btn-warning btn-sm">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Кризис</span>
+                </button>
+                <button id="btn-finish-round" class="btn btn-success btn-sm">
+                    <i class="fa-solid fa-flag-checkered"></i> <span>Итоги</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="players-grid" id="players-container"></main>
+    </div>
+
+    <div id="build-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-hammer"></i> Новое строительство</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="cost-hint">Стоимость: <strong>10 д.е.</strong></p>
+                <div class="build-grid" id="build-options"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="summary-modal" class="modal-overlay hidden">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-chart-pie"></i> Итоги раунда <span id="summary-round-num"></span></h3>
+            </div>
+            <div class="summary-table-container">
+                <div class="summary-header">
+                    <span>Район</span>
+                    <span>Доход</span>
+                    <span>Налог</span>
+                    <span>Итог</span>
+                </div>
+                <div id="summary-list" class="summary-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-next-round" class="btn btn-primary btn-block">
+                    Следующий раунд <i class="fa-solid fa-forward"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
