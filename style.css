@@ -22,6 +22,15 @@
 
 * { box-sizing: border-box; outline: none; }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-gradient);
@@ -98,8 +107,15 @@ body {
     padding: 40px;
     text-align: center;
 }
+
 .logo-area { color: var(--primary); margin-bottom: 30px; }
-.logo-area i { font-size: 3rem; margin-bottom: 10px; }
+.logo-area img.main-logo {
+    max-width: 150px;
+    height: auto;
+    display: block;
+    margin: 0 auto 15px auto;
+    border-radius: 12px;
+}
 .logo-area h1 { margin: 0; font-size: 2.5rem; letter-spacing: -1px; }
 .logo-area p { color: var(--gray); margin: 5px 0 0; }
 
