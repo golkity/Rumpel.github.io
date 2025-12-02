@@ -8,9 +8,19 @@ const SPHERES = {
 };
 
 const ACTIONS = {
-    1: "Грант", 2: "Налоги", 3: "Стройка", 
+    1: "Грант (+)", 2: "Налоги (-)", 3: "Стройка", 
     4: "Апгрейд", 5: "Покупка земли", 6: "Форс-мажор"
 };
+
+const DISTRICTS = [
+    "Архангельск", "Северодвинск", "Новодвинск", "Котлас", "Коряжма",
+    "Мирный", "Вельский р-н", "Верхнетоемский р-н", "Вилегодский р-н", 
+    "Виноградовский р-н", "Каргопольский р-н", "Коношский р-н", 
+    "Котласский р-н", "Красноборский р-н", "Ленский р-н", 
+    "Лешуконский р-н", "Мезенский р-н", "Няндомский р-н", 
+    "Онежский р-н", "Пинежский р-н", "Плесецкий р-н", 
+    "Приморский р-н", "Устьянский р-н", "Холмогорский р-н", "Шенкурский р-н"
+];
 
 const UPGRADE_COST = 20;
 const BUILD_COST = 10;
@@ -29,25 +39,52 @@ function setupEventListeners() {
     document.getElementById('btn-inc-players').addEventListener('click', () => changePlayerCount(1));
     document.getElementById('btn-dec-players').addEventListener('click', () => changePlayerCount(-1));
     document.getElementById('btn-start').addEventListener('click', startGame);
-
-    document.getElementById('btn-roll-action').addEventListener('click', rollAction);
-    document.getElementById('btn-roll-sphere').addEventListener('click', rollSphere);
     document.getElementById('btn-crisis').addEventListener('click', toggleCrisis);
     document.getElementById('btn-finish-round').addEventListener('click', calculateSummary);
-    
+    document.getElementById('btn-next-round').addEventListener('click', nextRound);
+    document.getElementById('btn-rnd-action').addEventListener('click', () => rollDice('display-action', ACTIONS));
+    document.getElementById('btn-rnd-sphere').addEventListener('click', () => rollDice('display-sphere', SPHERES));
+
     document.querySelectorAll('.close-modal').forEach(b => {
         b.addEventListener('click', (e) => {
             e.target.closest('.modal-overlay').classList.add('hidden');
         });
     });
+}
+
+function rollDice(displayId, dataObj) {
+    const display = document.getElementById(displayId);
+    const keys = Object.keys(dataObj);
+    const btn = displayId === 'display-action' ? document.getElementById('btn-rnd-action') : document.getElementById('btn-rnd-sphere');
     
-    document.getElementById('btn-next-round').addEventListener('click', nextRound);
+    btn.disabled = true;
+    display.classList.add('rolling');
+
+    let count = 0;
+    const maxCount = 15;
+    const speed = 50;
+
+    const interval = setInterval(() => {
+        const rndKey = keys[Math.floor(Math.random() * keys.length)];
+        const text = dataObj[rndKey].name || dataObj[rndKey];
+        
+        display.innerText = text;
+        count++;
+
+        if (count >= maxCount) {
+            clearInterval(interval);
+            btn.disabled = false;
+            display.classList.remove('rolling');
+            display.style.transform = "scale(1.2)";
+            setTimeout(() => display.style.transform = "scale(1)", 200);
+        }
+    }, speed);
 }
 
 function changePlayerCount(delta) {
     const input = document.getElementById('player-count');
     let val = parseInt(input.value) + delta;
-    if (val >= 2 && val <= 12) {
+    if (val >= 1 && val <= 4) {
         input.value = val;
     }
 }
@@ -57,7 +94,7 @@ function startGame() {
     
     players = Array.from({ length: count }, (_, i) => ({
         id: i,
-        name: `Район ${i + 1}`,
+        name: DISTRICTS[i] || `Район ${i+1}`, 
         money: 100,
         buildings: []
     }));
@@ -74,13 +111,25 @@ function renderPlayers() {
     const container = document.getElementById('players-container');
     container.innerHTML = '';
 
+    const takenDistricts = players.map(p => p.name);
+
     players.forEach(p => {
         const card = document.createElement('div');
         card.className = 'player-card';
+
+        let optionsHtml = '';
+        DISTRICTS.forEach(dist => {
+            const isTaken = takenDistricts.includes(dist) && dist !== p.name;
+            const isSelected = dist === p.name ? 'selected' : '';
+            optionsHtml += `<option value="${dist}" ${isTaken ? 'disabled' : ''} ${isSelected}>${dist}</option>`;
+        });
         
         card.innerHTML = `
             <div class="pc-header">
-                <input type="text" value="${p.name}" class="name-input" onchange="updateName(${p.id}, this.value)">
+                <select class="district-select" onchange="updateName(${p.id}, this.value)">
+                    <option value="" disabled>Выберите район</option>
+                    ${optionsHtml}
+                </select>
                 <div class="money"><i class="fa-solid fa-coins"></i> ${p.money.toFixed(0)}</div>
             </div>
             <div class="pc-controls">
@@ -129,7 +178,10 @@ function renderPlayers() {
 
 window.updateName = (id, newName) => {
     const p = players.find(x => x.id === id);
-    if(p) p.name = newName;
+    if(p) {
+        p.name = newName;
+        renderPlayers(); 
+    }
 };
 
 window.modifyMoney = (id, amount) => {
@@ -202,19 +254,6 @@ window.deleteBuilding = (playerId, buildIdx) => {
     }
 };
 
-function rollAction() {
-    const val = Math.floor(Math.random() * 6) + 1;
-    const el = document.getElementById('dice-res-action');
-    el.innerHTML = `<span style="font-size:1.2em; margin-right:5px;">${val}</span> ${ACTIONS[val]}`;
-}
-
-function rollSphere() {
-    const val = Math.floor(Math.random() * 6) + 1;
-    const el = document.getElementById('dice-res-sphere');
-    const sphere = SPHERES[val];
-    el.innerHTML = `<i class="fa-solid ${sphere.icon}"></i> ${sphere.name}`;
-}
-
 function toggleCrisis() {
     isCrisisMode = !isCrisisMode;
     const btn = document.getElementById('btn-crisis');
@@ -272,6 +311,9 @@ function nextRound() {
     document.getElementById('round-display').innerHTML = `${currentRound}<span class="total">/${MAX_ROUNDS}</span>`;
     document.getElementById('summary-modal').classList.add('hidden');
     
+    document.getElementById('display-action').innerText = "Действие...";
+    document.getElementById('display-sphere').innerText = "Сфера...";
+
     if(isCrisisMode) toggleCrisis();
 }
 
